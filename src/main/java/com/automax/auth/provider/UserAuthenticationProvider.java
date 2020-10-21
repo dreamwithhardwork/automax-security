@@ -28,6 +28,7 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         String username = authentication.getName();
         String password = (String) authentication.getCredentials();
 
+
         RegisteredUser user= usersRepository.findOneByEmail(username);
         if(user ==null){
             user = usersRepository.findOneByMobile(username);

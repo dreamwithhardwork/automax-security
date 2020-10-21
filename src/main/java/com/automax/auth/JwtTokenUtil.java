@@ -45,7 +45,7 @@ public class JwtTokenUtil implements Serializable {
 
     public String generateToken(RegisteredUser user) {
         Map<String,Object> claims = new HashMap<>();
-        String token = Jwts.builder().setClaims(claims).setSubject(user.getUsername())
+        String token = Jwts.builder().setClaims(claims).setSubject(user.getEmail()==null?user.getMobile():user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+1000 *expiry))
                 .signWith(SignatureAlgorithm.HS256,secret)

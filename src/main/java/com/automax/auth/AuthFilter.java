@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 @Component
 class AuthFilter extends OncePerRequestFilter {
@@ -39,7 +41,6 @@ class AuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         logger.debug(request.getRequestURI());
         String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
@@ -52,9 +53,8 @@ class AuthFilter extends OncePerRequestFilter {
                 }
             }
             if(username!=null && SecurityContextHolder.getContext().getAuthentication() == null){
-                UsernamePasswordAuthentication contextToken = new UsernamePasswordAuthentication(username,
-                        null);
-                SecurityContextHolder.getContext().setAuthentication(contextToken);
+                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username,null, new ArrayList<>());
+                SecurityContextHolder.getContext().setAuthentication(token);
             }
             filterChain.doFilter(request,response);
         }catch (Exception ex){
