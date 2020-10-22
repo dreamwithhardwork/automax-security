@@ -34,12 +34,6 @@ class AuthFilter extends OncePerRequestFilter {
     Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getPathInfo() !=null ? request.getPathInfo() : request.getServletPath();
-        return (contextPath.equals("/external") || path.contains("/login") || path.contains("/signup") || path.contains("swagger") || path.contains("api-docs"));
-    }
-
-    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         logger.debug(request.getRequestURI());
         String requestTokenHeader = request.getHeader("Authorization");
@@ -53,7 +47,8 @@ class AuthFilter extends OncePerRequestFilter {
                 }
             }
             if(username!=null && SecurityContextHolder.getContext().getAuthentication() == null){
-                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username,null, new ArrayList<>());
+                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username,null,
+                        jwtTokenUtil.getAuthorities(jwtToken));
                 SecurityContextHolder.getContext().setAuthentication(token);
             }
             filterChain.doFilter(request,response);

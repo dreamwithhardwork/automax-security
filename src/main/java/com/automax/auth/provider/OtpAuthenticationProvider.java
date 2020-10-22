@@ -52,7 +52,8 @@ public class OtpAuthenticationProvider implements AuthenticationProvider {
         }
 
         if (bCryptPasswordEncoder.matches(otp, otpObject.getOtp())) {
-            OtpAuthentication auth = new OtpAuthentication(username, bCryptPasswordEncoder.encode(user.getPassword()));
+            OtpAuthentication auth =
+                    new OtpAuthentication(username, bCryptPasswordEncoder.encode(user.getPassword()),jwtTokenUtil.getAuthorities(user.getRoles()));
             auth.setDetails(user);
             return auth;
         }

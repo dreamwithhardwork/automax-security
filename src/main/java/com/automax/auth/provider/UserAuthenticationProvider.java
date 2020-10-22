@@ -38,7 +38,8 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
         }
 
         if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            UsernamePasswordAuthentication auth = new UsernamePasswordAuthentication(username, password);
+            UsernamePasswordAuthentication auth =
+                    new UsernamePasswordAuthentication(username, password,jwtTokenUtil.getAuthorities(user.getRoles()));
             auth.setDetails(user);
             return auth;
         }

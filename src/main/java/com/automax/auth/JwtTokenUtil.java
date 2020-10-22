@@ -3,13 +3,12 @@ package com.automax.auth;
 import io.jsonwebtoken.*;
 import org.models.core.users.RegisteredUser;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.models.core.enums.Roles;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JwtTokenUtil implements Serializable {
@@ -30,10 +29,6 @@ public class JwtTokenUtil implements Serializable {
         return getClaimsFromToken(token).getSubject();
     }
 
-    public List<String> getAuthoriries(String token){
-        Claims claims = getClaimsFromToken(token);
-        return (List<String>) claims.get("roles");
-    }
 
 
     public boolean validate(String token){
@@ -45,12 +40,34 @@ public class JwtTokenUtil implements Serializable {
 
     public String generateToken(RegisteredUser user) {
         Map<String,Object> claims = new HashMap<>();
+        claims.put("roles",user.getRoles());
         String token = Jwts.builder().setClaims(claims).setSubject(user.getEmail()==null?user.getMobile():user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+1000 *expiry))
                 .signWith(SignatureAlgorithm.HS256,secret)
                 .compact();
         return token;
+    }
+    public List<Roles> getRoles(String token){
+        Claims claims = getClaimsFromToken(token);
+        List<String> roles = (List<String>) claims.get("roles");
+        List<Roles> res = new ArrayList<>();
+        roles.forEach(r -> {res.add(Roles.valueOf(r));});
+        return res;
+    }
 
+    public List<GrantedAuthority> getAuthorities(List<Roles> roles){
+        List<GrantedAuthority> auth = new ArrayList<>();
+        if(roles!=null)
+            roles.forEach((roles1 -> auth.add(() -> roles1.name())));
+        return auth;
+    }
+    public List<GrantedAuthority> getAuthorities(String token){
+        List<Roles> roles = getRoles(token);
+        if(roles==null)
+        {
+            return  new ArrayList<>();
+        }
+        return  getAuthorities(roles);
     }
 }
